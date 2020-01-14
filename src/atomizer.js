@@ -38,8 +38,8 @@ Atomizer.prototype.addRules = function(rules/*:AtomizerRules*/)/*:void*/ {
         var ruleFound = rule.type === 'pattern' && this.rulesMap.hasOwnProperty(rule.matcher);
         var helperFound = rule.type === 'helper' && this.helpersMap.hasOwnProperty(rule.matcher);
 
-        if ((ruleFound && !_.isEqual(this.rules[this.rulesMap[rule.matcher]], rule)) ||
-                (helperFound && !_.isEqual(this.rules[this.helpersMap[rule.matcher]], rule))) {
+        if (!rule.overrideDefault && ((ruleFound && !_.isEqual(this.rules[this.rulesMap[rule.matcher]], rule)) ||
+                (helperFound && !_.isEqual(this.rules[this.helpersMap[rule.matcher]], rule)))) {
             throw new Error('Rule ' + rule.matcher + ' already exists with a different defintion.');
         }
 
@@ -51,6 +51,18 @@ Atomizer.prototype.addRules = function(rules/*:AtomizerRules*/)/*:void*/ {
                 this.rulesMap[rule.matcher] = this.rules.length - 1;
             } else {
                 this.helpersMap[rule.matcher] = this.rules.length - 1;
+            }
+        } else if (rule.overrideDefault) {
+            var existing = this.rules.findIndex(function(r) { return r.matcher === rule.matcher; });
+            if (existing !== -1) {
+                this.rules[existing] = rule;
+                if (rule.type === 'pattern') {
+                    this.rulesMap[rule.matcher] = existing;
+                    delete this.helpersMap[rule.matcher];
+                } else {
+                    this.helpersMap[rule.matcher] = existing;
+                    delete this.rulesMap[rule.matcher];
+                }
             }
         }
     }, this);
