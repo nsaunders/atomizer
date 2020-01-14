@@ -113,6 +113,28 @@ describe('Atomizer()', function () {
                 }]);
             }).to.not.throw();
         });
+        it('replaces an existing rule if overrideDefault is true', function () {
+            var rules = [{
+                type: 'pattern',
+                name: 'Border',
+                matcher: 'Bd',
+                styles: {
+                    'border': '$0'
+                }
+            }];
+            var atomizer = new Atomizer(null, rules);
+            var override = {
+                type: 'pattern',
+                name: 'Border',
+                matcher: 'Bd',
+                styles: {
+                    'background-color': '$0'
+                },
+                overrideDefault: true
+            };
+            atomizer.addRules([override]);
+            expect(atomizer.rules).to.deep.equal([override]);
+        });
         it('adds a new rule to the atomizer instance and resets the syntax', function () {
             var atomizer = new Atomizer();
             var myRules = [{
